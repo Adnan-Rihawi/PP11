@@ -91,8 +91,13 @@ In this exercise you will:
 #### Reflection Questions
 
 1. **How do you link `prev` and `next` pointers correctly using a static array?**
-2. **What are advantages and limitations of compile-time vs. dynamic allocation?**
-3. **How would you extend this static list to include additional data fields?**
+   Man nutzt einfach die festen Positionen im Array: nodeslil prev zeigt auf nodes[i-1], und nodes(i]. next zeigt auf nodes[i+1]. Für das erste Element ist prev = NULL, für das letzte next = NULL.
+So entsteht die doppelt verkettete Liste komplett ohne malloc.
+3. **What are advantages and limitations of compile-time vs. dynamic allocation?**
+   Vorteile: Kein dynamischer Speicher → keine Leaks, keine Fehler durch malloc Sehr schnell, da alles im statischen Speicher liegt Einfacher Code, ideal für feste kleine Listen
+Nachteile und limits: Größe ist fix und kann nicht wachsen Speicher wird immer reserviert, auch wenn die Liste nicht genutzt wird Weniger flexibel als dynamische Datenstrukturen
+5. **How would you extend this static list to include additional data fields?**
+   Man ergänzt einfach die DNode-Struktur um neue Felder, die statischen Array-Elemente enthalten dann automatisch die neuen Felder und können wie gewohnt initialisiert werden.
 
 ---
 
@@ -158,9 +163,10 @@ In this exercise you will:
 
 #### Reflection Questions
 
-1. **Why is `malloc` necessary when adding nodes dynamically?**
-2. **How can you traverse the list to print each node’s address and value?**
-3. **What are the consequences of not freeing the list before exit?**
+1. **Why is `malloc` necessary when adding nodes dynamically?** Weil die Liste zur Laufzeit wächst und jeder neue Node Speicher im Heap braucht. Ohne malloc gäbe es keinen Platz für neue Elemente, da die Größe nicht vorher feststeht.
+2. **How can you traverse the list to print each node’s address and value?** Man läuft einfach mit einem Pointer durch die Liste, man startet bei head und folgt jedem next-Pointer bis NULL.
+3. **What are the consequences of not freeing the list before exit?** Der reservierte Heap-Speicher bleibt belegt
+- Memory Leak. Das Programm beendet sich zwar, aber es hat Speicher hinterlassen, der nicht sauber freigegeben wurde. Bei langen Programmen oder vielen Operationen kann das zu ernsthaften Problemen fuhren.
 
 ---
 
@@ -243,10 +249,16 @@ gcc -o solutions/json_main solutions/json_main.c solutions/json_list.o -ljansson
 
 #### Reflection Questions
 
-1. **How does using `getopt` make the program more flexible than `argv[1]`?**
-2. **What happens if the user omits the `-i` option?**
+1. **How does using `getopt` make the program more flexible than `argv[1]`?** Mit getopt kannst du benannte Optionen wie -i verwenden, statt dich auf eine feste Position in argv[] zu verlassen. Das erlaubt mehr Argumente, beliebige
+Reihenfolge und klare Fehlermeldungen.
+2. **What happens if the user omits the `-i` option?** Dann bleibt filename ==
+NULL und das Programm ruft usage()
+auf - Fehlerhinweis +
+Programmabbruch. So wird verhindert, dass ohne gültige Eingabedatei
+weitergearbeitet wird.
 3. **How can you validate that the JSON file loaded is indeed an array?**
-
+Um zu prüfen, ob die geladene JSON-Datei wirklich ein Array ist, verwende ich json_is_array(root). Nur wenn diese Funktion true zurückgbt, weiß ich sicher, dass die Struktur ein Array ist und ich es gefahrlos iterieren kann.
+Andernfalls breche ich ab und melde einen Fehler.
 ---
 
 **Remember:** Stop after **90 minutes** and record where you stopped.
